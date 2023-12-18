@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kerwin.gallery.repository.CategoryRepository">
+
+    <select id="selectCategoryByName" parameterType="java.lang.String" resultType="java.util.Map">
+        select id from `category` where `name`=#{name};
+    </select>
+
+    <!-- 插入多条标签 -->
+    <insert id="insertMultiple" parameterType="arraylist" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `category` (`name`, `href`) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.name}, #{item.href})
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kerwin.gallery.repository.ThumbnailRepository">
+
+    <sql id="selectThumbnailField">
+        `thumbnail`.`id`, `thumbnail`.`width`, `thumbnail`.`height`, `thumbnail`.`mdsum`,
+        `thumbnail`.`filename`, `thumbnail`.`filename_server`, `thumbnail`.`relative_filepath_server`,
+        `thumbnail`.`file_type`, `thumbnail`.`preview_count`, `thumbnail`.`create_time`
+    </sql>
+
+    <sql id="selectWallpaperField">
+        `wallpaper`.`id`, `wallpaper`.`width`, `wallpaper`.`height`, `wallpaper`.`mdsum`,
+        `wallpaper`.`filename`, `wallpaper`.`filename_server`, `wallpaper`.`relative_filepath_server`,
+        `wallpaper`.`file_type`, `wallpaper`.`download_count`, `wallpaper`.`create_time`
+    </sql>
+
+    <!-- 插入数据，并返回数据库中的ID值   -->
+    <insert id="insertThumbnail" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+        insert into `thumbnail` (`url`, `width`, `height`, `mdsum`, `filename`,
+                               `filename_server`, `relative_filepath_server`, `filepath_server`,
+                               `file_type`)
+        values (#{map.url}, #{map.width}, #{map.height}, #{map.mdSum}, #{map.filename},
+                #{map.filenameServer}, #{map.relativeFilepathServer}, #{map.filepathServer},
+                #{map.fileType});
+    </insert>
+
+    <!-- 通过图片的MD5查找图片 -->
+    <select id="selectThumbnailByMd5" parameterType="java.lang.String" resultType="java.util.Map">
+        select <include refid="selectThumbnailField"></include> from thumbnail
+        where `mdsum`=#{mdSum, jdbcType=VARCHAR}
+    </select>
+
+    <!-- 通过图片的MD5查找图片 -->
+    <select id="selectThumbnailById" parameterType="java.lang.Long" resultType="java.util.Map">
+        select <include refid="selectThumbnailField"></include> from thumbnail
+        where `id`=#{id, jdbcType=BIGINT}
+    </select>
+
+    <!-- 绑定缩略图与标签 -->
+    <insert id="bingThumbnailWithCategory" parameterType="arraylist">
+        insert into `thumbnail_category` (`thumbnail_id`, `category_id`) values
+        <foreach collection="list" item="item" separator=",">
+            (#{thumbnailId}, #{item.id})
+        </foreach>
+    </insert>
+
+    <!-- 绑定缩略图与原图 -->
+    <insert id="bingThumbnailWithWallpaper" parameterType="map">
+        insert into `thumbnail_wallpaper` (`thumbnail_id`, `wallpaper_id`)
+        values (#{thumbnailId}, #{map.id})
+    </insert>
+
+    <!-- 绑定缩略图与分辨率 -->
+    <insert id="bingThumbnailWithDimensions" parameterType="arraylist">
+        insert into `thumbnail_dimensions` (`thumbnail_id`, `dimensions_id`) values
+        <foreach collection="list" item="item" separator=",">
+            (#{thumbnailId}, #{item.id})
+        </foreach>
+    </insert>
+
+    <!-- 模糊查询符合条件的缩略图ID -->
+    <sql id="selectThumbnailCond">
+        <where>
+            <if test="map.key != null and map.key neq''">
+                <bind name="key" value="'%' + map.key + '%'"/>
+                and id in (
+                <!-- 模糊查询分辨率表 -->
+                    SELECT `thumbnail_dimensions`.`thumbnail_id` FROM `dimensions`, `thumbnail_dimensions`
+                    WHERE `dimensions`.`id` = `thumbnail_dimensions`.`dimensions_id` AND`dimensions`.`size` LIKE #{key}
+                    UNION
+                <!-- 模糊查询标签表 -->
+                    SELECT `thumbnail_category`.`thumbnail_id` FROM `category`, `thumbnail_category`
+                    WHERE `category`.`id` = `thumbnail_category`.`category_id` AND `category`.`name` LIKE #{key}
+                )
+            </if>
+            <if test="map.label!= null and map.label neq ''">
+                and id in (
+                    <!-- 按值查询标签表 -->
+                    SELECT `thumbnail_category`.`thumbnail_id` FROM `category`, `thumbnail_category`
+                    WHERE `category`.`id` = `thumbnail_category`.`category_id`
+                    AND `category`.`href` LIKE concat('%', #{map.label, jdbcType=VARCHAR})
+                )
+            </if>
+        </where>
+    </sql>
+
+    <!-- 根据条件获取缩略图 -->
+    <select id="selectThumbnailList" resultType="java.util.Map">
+        select <include refid="selectThumbnailField"></include> from thumbnail
+        <include refid="selectThumbnailCond"></include>
+        <if test="sortString != null and sortString neq ''" >
+            ORDER BY #{sortString}
+        </if>
+        limit #{limit} offset #{offset};
+    </select>
+
+    <!-- 根据条件统计缩略图 -->
+    <select id="countThumbnailList" resultType="java.util.Map">
+        select count(*) as number from `thumbnail` <include refid="selectThumbnailCond"></include>;
+    </select>
+
+    <!-- 通过缩略图ID查找标签 -->
+    <select id="selectCategoryByThumbnailId" parameterType="long" resultType="java.util.Map">
+        select `category`.`name` as `label`, `category`.`href`
+        from `category`, `thumbnail_category`
+        where `category`.`id`=`thumbnail_category`.`category_id`
+              and `thumbnail_category`.thumbnail_id=#{thumbnailId, jdbcType=BIGINT}
+    </select>
+
+    <!-- 通过缩略图ID查找标签 -->
+    <select id="selectDimensionsByThumbnailId" parameterType="long" resultType="java.util.Map">
+        select `dimensions`.`width`, `dimensions`.`height`, `dimensions`.`size`
+        from `dimensions`, `thumbnail_dimensions`
+        where `dimensions`.`id`=`thumbnail_dimensions`.`dimensions_id`
+          and `thumbnail_dimensions`.thumbnail_id=#{thumbnailId, jdbcType=BIGINT}
+    </select>
+
+    <!-- 通过缩略图ID查找标签 -->
+    <select id="selectWallpaperByThumbnailId" parameterType="long" resultType="java.util.Map">
+        select <include refid="selectWallpaperField"></include>
+        from `wallpaper`, `thumbnail_wallpaper`
+        where `wallpaper`.`id`=`thumbnail_wallpaper`.`wallpaper_id`
+          and `thumbnail_wallpaper`.thumbnail_id=#{thumbnailId, jdbcType=BIGINT}
+    </select>
+
+    <!-- 缩略图预览加一 -->
+    <update id="addThumbnailPreview">
+        update `thumbnail` set preview_count = preview_count +  1 where id=#{thumbnailId, jdbcType=BIGINT}
+    </update>
+</mapper>

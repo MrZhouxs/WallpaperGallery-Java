@@ -1,0 +1,48 @@
+
+logging:
+    level:
+        ROOT: INFO
+        org.springframework.boot.autoconfigure: ERROR
+        com.kerwin.gallery.repository: DEBUG
+        com.kerwin.gallery: INFO
+    config: classpath:logback-spring.xml
+
+server:
+    port: 8090
+    address: 0.0.0.0
+    http2:
+        enabled: true
+    servlet:
+        encoding:
+            force: true
+
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        druid:
+            driver-class-name: com.mysql.cj.jdbc.Driver
+            url: jdbc:mysql://localhost:3306/gallery?characterEncoding=utf8&serverTimezone=UTC
+            username: root
+            password: 123456
+            initialSize: 5
+            minIdle: 5
+            maxActive: 20
+            maxWait: 60000
+            timeBetweenEvictionRunsMillis: 60000
+            minEvictableIdleTimeMillis: 300000
+            validationQuery: SELECT 1 FROM DUAL
+            testWhileIdle: true
+            testOnBorrow: false
+            testOnReturn: false
+            poolPreparedStatements: true
+            maxPoolPreparedStatementPerConnectionSize: 20
+            useGlobalDataSourceStat: true
+            connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+            mysql:
+                usePingMethod: false
+
+app:
+    swagger: true
+    upload_file_path: /Users/zhouxingsheng/Documents/JavaWorkSpace/WallpaperGallery
+    # 是否通过图片的MD5校验重复图片
+    check-duplicate: true

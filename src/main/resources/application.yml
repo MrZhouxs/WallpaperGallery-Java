@@ -1,0 +1,91 @@
+
+mybatis:
+    configuration:
+        map-underscore-to-camel-case: true
+        default-fetch-size: 100
+        default-statement-timeout: 30
+        call-setters-on-nulls: true
+    mapper-locations:
+        - classpath:mapper/*.xml
+        - classpath:mapper/auto/*.xml
+
+application:
+    httpCacheTimeToLiveInDays: 1461
+    cors:
+        allowed-origins: "*"
+        allowed-methods: "*"
+        allowed-headers: "*"
+        exposed-headers: Authorization,X-Total-Count,Content-Disposition,Duration
+        allow-credentials: true
+        max-age: 3600
+
+spring:
+    application:
+        name: wallpaper-gallery
+    profiles:
+        active: dev
+    jmx:
+        enabled: false
+    servlet:
+        multipart:
+            max-file-size: -1
+            max-request-size: -1
+    task:
+        execution:
+            thread-name-prefix: ${spring.application.name}-task-
+            pool:
+                core-size: 20
+                max-size: 50
+                queue-capacity: 0
+        scheduling:
+            thread-name-prefix: ${spring.application.name}-scheduling-
+            pool:
+                size: 5
+    mvc:
+        pathmatch:
+            matching-strategy: ant_path_matcher
+    flyway:
+        enabled: true
+        # 支持多个，用','隔开
+        locations: classpath:db/migration-mysql
+        # 是否创建元数据表
+        validate-on-migrate: true
+        # clean命令会删除指定scheme下的所有table
+        clean-disabled: false
+        # 如果数据库不是空表，需要设置成true，否则会报错
+        baseline-on-migrate: true
+
+server:
+    servlet:
+        session:
+            cookie:
+                http-only: true
+    ##  是否开启https
+    ssl:
+        enabled: true
+        key-store: classpath:tls/keystore.p12
+        key-store-password: password
+        key-store-type: PKCS12
+        key-alias: selfsigned
+        ciphers: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_256_GCM_SHA384, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_256_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
+        enabled-protocols: TLSv1.2
+
+#  mail:
+#    host: smtp.163.com
+#    username: Mrzhouxs@163.com
+#    password: zhouxs997464
+#    default-encoding: UTF-8
+#    protocol: smtp
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
+#            required: true
+#          timeout: 3000
+#          ssl:
+#            enable: true
+#            socketFactory:
+#              port: 465
+#              class: javax.net.ssl.SSLSocketFactory
