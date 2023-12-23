@@ -1,13 +1,13 @@
 package com.kerwin.gallery.web.rest;
 
 import com.kerwin.common.ResponseData;
+import com.kerwin.gallery.crawler.CrawlAllWebSiteAsync;
 import com.kerwin.gallery.service.WallpaperService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +23,12 @@ import java.util.Map;
 public class WallpaperController {
 
     private final WallpaperService wallpaperService;
+    private final CrawlAllWebSiteAsync crawlAllWebSiteAsync;
 
-    public WallpaperController(WallpaperService wallpaperService) {
+
+    public WallpaperController(WallpaperService wallpaperService, CrawlAllWebSiteAsync crawlAllWebSiteAsync) {
         this.wallpaperService = wallpaperService;
+        this.crawlAllWebSiteAsync = crawlAllWebSiteAsync;
     }
 
     @GetMapping("/list")
@@ -61,5 +64,32 @@ public class WallpaperController {
     public ResponseEntity<Map<String, Object>> addWallpaperDownloadCount(@PathVariable Long wallpaperId) {
         log.debug("REST request to web addWallpaperDownloadCount: {}", wallpaperId);
         return ResponseData.ajaxJson(this.wallpaperService.addWallpaperDownloadCount(wallpaperId));
+    }
+
+    @GetMapping("/crawl/{type}")
+    @ApiOperation(value = "指定爬取壁纸", notes = "根据类型指定爬取壁纸网站")
+    @ApiImplicitParam(paramType = "path", name = "type",
+            value = "网站类型：\n1、电脑壁纸\n2、极简壁纸\n3、3g壁纸\n4、Wallpaper Cave壁纸\n5、Wallpaper Craft壁纸")
+    public ResponseEntity<Map<String, Object>> crawlChoiseWallpaperType(@PathVariable Integer type) {
+        log.debug("REST request to web crawlChoiseWallpaperType: {}", type);
+        switch (type) {
+            case 1:
+                this.crawlAllWebSiteAsync.crawlComputerWall();
+                break;
+            case 2:
+                this.crawlAllWebSiteAsync.crawlJiJianWall();
+                break;
+            case 3:
+                this.crawlAllWebSiteAsync.crawlThreeWall();
+                break;
+            case 4:
+                this.crawlAllWebSiteAsync.crawlWallpaperCave();
+                break;
+            case 5:
+                this.crawlAllWebSiteAsync.crawlWallpapersCraft();
+            default:
+                throw new IllegalArgumentException("参数错误");
+        }
+        return ResponseData.ajaxJson(true);
     }
 }
