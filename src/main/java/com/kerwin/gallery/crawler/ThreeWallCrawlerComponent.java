@@ -61,7 +61,6 @@ public class ThreeWallCrawlerComponent implements HttpFactory {
 
     public ThreeWallCrawlerComponent(CrawlerCommon crawlerCommon) {
         this.crawlerCommon = crawlerCommon;
-        this.loginThreeWallPaper();
     }
 
     private void loginThreeWallPaper() {
@@ -93,6 +92,11 @@ public class ThreeWallCrawlerComponent implements HttpFactory {
         this.SaveFilePath = new File(this.uploadDirPath, "ThreeGWallPaper");
         this.ThumbnailFilePath = new File(this.SaveFilePath, "thumbnail");
 
+        this.loginThreeWallPaper();
+        if (PtCommon.isEmpty(this.COOKIE)) {
+            log.error("3g壁纸尝试登录时失败，无法爬取壁纸");
+            return;
+        }
         for (String url : this.StartUrls) {
             this.crawlerHelper(url);
         }

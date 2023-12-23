@@ -70,8 +70,8 @@ public class WallpaperController {
     @ApiOperation(value = "指定爬取壁纸", notes = "根据类型指定爬取壁纸网站")
     @ApiImplicitParam(paramType = "path", name = "type",
             value = "网站类型：\n1、电脑壁纸\n2、极简壁纸\n3、3g壁纸\n4、Wallpaper Cave壁纸\n5、Wallpaper Craft壁纸")
-    public ResponseEntity<Map<String, Object>> crawlChoiseWallpaperType(@PathVariable Integer type) {
-        log.debug("REST request to web crawlChoiseWallpaperType: {}", type);
+    public ResponseEntity<Map<String, Object>> crawlChooseWallpaperType(@PathVariable Integer type) {
+        log.debug("REST request to web crawlChooseWallpaperType: {}", type);
         switch (type) {
             case 1:
                 this.crawlAllWebSiteAsync.crawlComputerWall();
