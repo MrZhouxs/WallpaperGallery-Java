@@ -27,7 +27,7 @@ public interface ThumbnailRepository {
     // 绑定缩略图与分辨率
     void bingThumbnailWithDimensions(@Param("thumbnailId") Long thumbnailId, @Param("list") List<Map<String, Object>> list);
 
-    // 获取缩略图列表
+    // 关键词获取缩略图列表
     List<Map<String, Object>> selectThumbnailList(@Param("map") Map<String, Object> map,
                                                   @Param("offset") Long offset,
                                                   @Param("limit") Integer limit,
@@ -36,8 +36,17 @@ public interface ThumbnailRepository {
     // 统计缩略图数量
     Map<String, Long> countThumbnailList(@Param("map") Map<String, Object> map);
 
+    // 多关键词获取缩略图列表
+    List<Map<String, Object>> searchThumbnailListByIntelligentSemantics(@Param("words") List<String> words,
+                                                                        @Param("offset") Long offset,
+                                                                        @Param("limit") Integer limit,
+                                                                        @Param("sortString") String sortString);
+    // 统计缩略图数量
+    Map<String, Long> countThumbnailListByIntelligentSemantics(@Param("words") List<String> words);
+
     // 通过缩略图ID查找标签
     List<Map<String, Object>> selectCategoryByThumbnailId(@Param("thumbnailId") Long thumbnailId);
+
     // 通过缩略图ID查找分辨率
     List<Map<String, Object>> selectDimensionsByThumbnailId(@Param("thumbnailId") Long thumbnailId);
 

@@ -42,6 +42,18 @@ public class WallpaperController {
         return ResponseData.addPageHeader(this.wallpaperService.searchThumbnailList(params, pageable));
     }
 
+    @GetMapping("/intelligent/semantics")
+    @ApiOperation(value = "关键词搜索", notes = "智能语义解析关键词进行查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", name = "key", value = "关键词查询", dataType = "String"),
+    })
+    public ResponseEntity<List<Map<String, Object>>> searchThumbnailListByIntelligentSemantics(
+            @ApiIgnore @RequestParam Map<String, Object> params,
+            Pageable pageable) {
+        log.debug("REST request to web searchThumbnailListByIntelligentSemantics: {}, {}", params, pageable);
+        return ResponseData.addPageHeader(this.wallpaperService.searchThumbnailListByIntelligentSemantics(params, pageable));
+    }
+
     @GetMapping("/thumbnail/{thumbnailId}")
     @ApiOperation(value = "获取缩略图详情", notes = "根据缩略图ID获取缩略图详情")
     @ApiImplicitParam(paramType = "path", name = "thumbnailId", value = "缩略图ID", dataType = "Long")

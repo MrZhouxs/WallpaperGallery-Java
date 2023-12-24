@@ -1,6 +1,8 @@
 package com.kerwin.gallery.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.kerwin.common.PtCommon;
+import com.kerwin.common.WordStatementParserUtil;
 import com.kerwin.gallery.repository.ThumbnailRepository;
 import com.kerwin.gallery.repository.WallpaperRepository;
 import com.kerwin.gallery.service.WallpaperService;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,15 @@ public class WallpaperServiceImpl implements WallpaperService {
         this.wallpaperRepository = wallpaperRepository;
     }
 
+    private List<Map<String, Object>> searchThumbnailById(List<Map<String, Object>> data) {
+        // 通过缩略图ID查找标签
+        return data.stream().peek(thumbnail -> {
+            Long thumbnailId = PtCommon.toLong(thumbnail.get("id"));
+            List<Map<String, Object>> categories = this.thumbnailRepository.selectCategoryByThumbnailId(thumbnailId);
+            thumbnail.put("categories", categories);
+        }).collect(Collectors.toList());
+    }
+
     /**
      * 获取缩略图列表：每张缩略图包含标签信息
      * 通过对分辨率、标签模糊查找缩略图
@@ -42,13 +54,31 @@ public class WallpaperServiceImpl implements WallpaperService {
         String sortString = PtCommon.getSortString(pageable);
         // 查找缩略图
         List<Map<String, Object>> data = this.thumbnailRepository.selectThumbnailList(params, pageable.getOffset(), pageable.getPageSize(), sortString);
-        // 通过缩略图ID查找标签
-        data = data.stream().peek(thumbnail -> {
-            Long thumbnailId = PtCommon.toLong(thumbnail.get("id"));
-            List<Map<String, Object>> categories = this.thumbnailRepository.selectCategoryByThumbnailId(thumbnailId);
-            thumbnail.put("categories", categories);
-        }).collect(Collectors.toList());
+        data = this.searchThumbnailById(data);
         Map<String, Long> count = this.thumbnailRepository.countThumbnailList(params);
+        return new PageImpl<>(data, pageable, count == null ? 0L : count.get("number"));
+    }
+
+    @Override
+    public Page<Map<String, Object>> searchThumbnailListByIntelligentSemantics(Map<String, Object> params, Pageable pageable) {
+        List<Map<String, Object>> data = new ArrayList<>();
+        Map<String, Long> count = null;
+        // 拼接排序字段
+        String sortString = PtCommon.getSortString(pageable);
+        String keyWords = PtCommon.toString(params.get("key"));
+        if (StrUtil.isNotBlank(keyWords)) {
+            // 智能语义分词
+            List<String> words = WordStatementParserUtil.parser(keyWords);
+            if (PtCommon.isNotEmpty(words)) {
+                // 查找缩略图
+                data = this.thumbnailRepository.searchThumbnailListByIntelligentSemantics(words, pageable.getOffset(), pageable.getPageSize(), sortString);
+                // 通过缩略图ID查找标签
+                data = this.searchThumbnailById(data);
+                // 统计数量
+                count = this.thumbnailRepository.countThumbnailListByIntelligentSemantics(words);
+            }
+        }
+
         return new PageImpl<>(data, pageable, count == null ? 0L : count.get("number"));
     }
 

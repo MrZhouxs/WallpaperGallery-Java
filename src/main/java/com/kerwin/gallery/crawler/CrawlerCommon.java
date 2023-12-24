@@ -3,16 +3,12 @@ package com.kerwin.gallery.crawler;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kerwin.common.PtCommon;
+import com.kerwin.common.WordStatementParserUtil;
 import com.kerwin.gallery.component.ImageComponent;
 import com.kerwin.gallery.repository.CategoryRepository;
 import com.kerwin.gallery.repository.DimensionsRepository;
 import com.kerwin.gallery.repository.ThumbnailRepository;
 import com.kerwin.gallery.repository.WallpaperRepository;
-import net.sourceforge.pinyin4j.PinyinHelper;
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -60,31 +56,6 @@ public class CrawlerCommon {
         Path parentPath = Paths.get(this.uploadDirPath);
         Path childPath = Paths.get(file.getCanonicalPath());
         return parentPath.relativize(childPath).toString();
-    }
-
-    /**
-     * 汉子转拼音
-     * @param chinese   待转的汉子
-     * @return          拼音
-     */
-    private String chineseToPinYin(String chinese) {
-        StringBuilder sb = new StringBuilder();
-        char[] chars = chinese.toCharArray();
-        HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
-        format.setCaseType(HanyuPinyinCaseType.LOWERCASE);
-        format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-        for (char ch : chars) {
-            if (ch > 128) {
-                try {
-                    sb.append(PinyinHelper.toHanyuPinyinStringArray(ch, format)[0]);
-                } catch (BadHanyuPinyinOutputFormatCombination e) {
-                    e.printStackTrace();
-                }
-            } else {
-                sb.append(ch);
-            }
-        }
-        return sb.toString();
     }
 
     /**
@@ -142,7 +113,7 @@ public class CrawlerCommon {
         for (String cat : categories) {
             Map<String, Object> map = new HashMap<String, Object>(){{
                 put("name", cat);
-                put("href", "/category/" + chineseToPinYin(cat));
+                put("href", "/category/" + WordStatementParserUtil.toPinYin(cat));
             }};
             list.add(map);
         }

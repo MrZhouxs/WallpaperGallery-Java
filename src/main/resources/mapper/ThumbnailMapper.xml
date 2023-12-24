@@ -63,7 +63,7 @@
         <where>
             <if test="map.key != null and map.key neq''">
                 <bind name="key" value="'%' + map.key + '%'"/>
-                and id in (
+                or id in (
                 <!-- 模糊查询分辨率表 -->
                     SELECT `thumbnail_dimensions`.`thumbnail_id` FROM `dimensions`, `thumbnail_dimensions`
                     WHERE `dimensions`.`id` = `thumbnail_dimensions`.`dimensions_id` AND`dimensions`.`size` LIKE #{key}
@@ -74,13 +74,30 @@
                 )
             </if>
             <if test="map.label!= null and map.label neq ''">
-                and id in (
+                or id in (
                     <!-- 按值查询标签表 -->
                     SELECT `thumbnail_category`.`thumbnail_id` FROM `category`, `thumbnail_category`
                     WHERE `category`.`id` = `thumbnail_category`.`category_id`
                     AND `category`.`href` LIKE concat('%', #{map.label, jdbcType=VARCHAR})
                 )
             </if>
+        </where>
+    </sql>
+
+    <!-- 模糊查询符合条件的缩略图ID -->
+    <sql id="selectThumbnailCondByWords">
+        <where>
+            <foreach collection="words" item="word" index="index">
+                <if test="word != null and word neq''">
+                    <bind name="key" value="'%' + word + '%'"/>
+                    or id in (
+                    <!-- 模糊查询标签表 -->
+                    SELECT `thumbnail_category`.`thumbnail_id` FROM `category`, `thumbnail_category`
+                    WHERE `category`.`id` = `thumbnail_category`.`category_id`
+                    AND `category`.`name` LIKE concat('%', #{word, jdbcType=VARCHAR})
+                    )
+                </if>
+            </foreach>
         </where>
     </sql>
 
@@ -97,6 +114,21 @@
     <!-- 根据条件统计缩略图 -->
     <select id="countThumbnailList" resultType="java.util.Map">
         select count(*) as number from `thumbnail` <include refid="selectThumbnailCond"></include>;
+    </select>
+
+    <!-- 多关键词获取缩略图 -->
+    <select id="searchThumbnailListByIntelligentSemantics" resultType="java.util.Map">
+        select <include refid="selectThumbnailField"></include> from `thumbnail`
+        <include refid="selectThumbnailCondByWords"></include>
+        <if test="sortString != null and sortString neq ''" >
+            ORDER BY #{sortString}
+        </if>
+        limit #{limit} offset #{offset};
+    </select>
+
+    <!-- 多关键词统计缩略图 -->
+    <select id="countThumbnailListByIntelligentSemantics" resultType="java.util.Map">
+        select count(*) as number from `thumbnail` <include refid="selectThumbnailCondByWords"></include>;
     </select>
 
     <!-- 通过缩略图ID查找标签 -->

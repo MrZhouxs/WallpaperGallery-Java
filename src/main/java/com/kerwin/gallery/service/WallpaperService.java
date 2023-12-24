@@ -9,6 +9,8 @@ public interface WallpaperService {
 
     Page<Map<String, Object>> searchThumbnailList(Map<String, Object> params, Pageable pageable);
 
+    Page<Map<String, Object>> searchThumbnailListByIntelligentSemantics(Map<String, Object> params, Pageable pageable);
+
     Map<String, Object> getThumbnailDetail(Long thumbnailId);
 
     Page<Map<String, Object>> getThumbnailByLabel(String label, Pageable pageable);
