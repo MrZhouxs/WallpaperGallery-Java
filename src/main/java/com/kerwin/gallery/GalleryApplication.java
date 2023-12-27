@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
+@EnableAsync
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
 public class GalleryApplication {

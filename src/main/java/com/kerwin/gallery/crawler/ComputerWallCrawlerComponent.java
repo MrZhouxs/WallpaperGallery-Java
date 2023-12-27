@@ -40,7 +40,7 @@ public class ComputerWallCrawlerComponent implements HttpFactory {
         this.crawlerCommon = crawlerCommon;
     }
 
-    public void crawler() {
+    public void crawler() throws IOException{
         this.SaveFilePath = new File(this.uploadDirPath, "ComputerWallPaper");
         this.ThumbnailFilePath = new File(this.SaveFilePath, "thumbnail");
         // 获取所有分类

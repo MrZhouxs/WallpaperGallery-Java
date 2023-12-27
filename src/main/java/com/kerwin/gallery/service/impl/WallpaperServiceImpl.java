@@ -7,6 +7,7 @@ import com.kerwin.gallery.repository.ThumbnailRepository;
 import com.kerwin.gallery.repository.WallpaperRepository;
 import com.kerwin.gallery.service.WallpaperService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class WallpaperServiceImpl implements WallpaperService {
+
+    @Value("${app.word-segments-enable: false}")
+    private Boolean wordSegmentsEnable;
 
     private final ThumbnailRepository thumbnailRepository;
     private final WallpaperRepository wallpaperRepository;
@@ -50,6 +54,10 @@ public class WallpaperServiceImpl implements WallpaperService {
      */
     @Override
     public Page<Map<String, Object>> searchThumbnailList(Map<String, Object> params, Pageable pageable) {
+        // 查询是否启用智能语义分析
+        if (this.wordSegmentsEnable) {
+            return this.searchThumbnailListByIntelligentSemantics(params, pageable);
+        }
         // 拼接排序字段
         String sortString = PtCommon.getSortString(pageable);
         // 查找缩略图

@@ -1,17 +1,13 @@
 package com.kerwin.gallery.crawler;
 
-import cn.hutool.core.thread.ThreadUtil;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Date;
 
 /**
  * 所有网站爬取的公共接口
  */
-@EnableAsync
 @Service
 public class CrawlAllWebSiteAsync {
 
@@ -48,7 +44,7 @@ public class CrawlAllWebSiteAsync {
     @Async
     public void crawlComputerWall() {
         try {
-            this.threeWallCrawlerComponent.crawler();
+            this.computerWallCrawlerComponent.crawler();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,7 +52,7 @@ public class CrawlAllWebSiteAsync {
     @Async
     public void crawlWallpaperCave() {
         try {
-            this.threeWallCrawlerComponent.crawler();
+            this.wallpapercaveCrawlerComponent.crawler();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -64,7 +60,7 @@ public class CrawlAllWebSiteAsync {
     @Async
     public void crawlWallpapersCraft() {
         try {
-            this.threeWallCrawlerComponent.crawler();
+            this.wallpapersCraftCrawlerComponent.crawler();
         } catch (IOException e) {
             e.printStackTrace();
         }
