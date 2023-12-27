@@ -55,7 +55,8 @@ public class WordStatementParserUtil {
     public static List<String> parser(String sentence) {
         List<String> words = new ArrayList<>();
         for (SegmentationAlgorithm algorithm : SegmentationAlgorithm.values()) {
-            for (Word word : WordSegmenter.segWithStopWords(sentence, algorithm)) {
+            // seg移除停用词 segWithStopWords保留停用词
+            for (Word word : WordSegmenter.seg(sentence, algorithm)) {
                 String text = word.getText();
                 // 分词
                 words.add(text);
