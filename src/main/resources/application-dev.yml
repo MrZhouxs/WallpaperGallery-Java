@@ -1,7 +1,6 @@
 
 logging:
     level:
-        ROOT: INFO
         org.springframework.boot.autoconfigure: ERROR
         com.kerwin.gallery.repository: DEBUG
         com.kerwin.gallery: INFO
@@ -41,10 +40,17 @@ spring:
             mysql:
                 usePingMethod: false
 
+# 自定义分表参数
+mydog:
+    # 是否开启自动分表，默认开启
+    enable: true
+    # 每张表的阈值，默认100万
+    threshold: 100
+
 app:
     swagger: true
     upload_file_path: /Users/zhouxingsheng/Documents/JavaWorkSpace/WallpaperGallery
     # 是否通过图片的MD5校验重复图片
     check-duplicate: true
     # 系统初始化时是否执行word分词以让word分词自动加载配置文件，默认不加载
-    word-segments-enable: true
+    word-segments-enable: false

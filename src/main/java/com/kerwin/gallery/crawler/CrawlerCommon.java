@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.kerwin.common.PtCommon;
 import com.kerwin.common.WordStatementParserUtil;
 import com.kerwin.gallery.component.ImageComponent;
+import com.kerwin.gallery.mydog.MyDogService;
 import com.kerwin.gallery.repository.CategoryRepository;
 import com.kerwin.gallery.repository.DimensionsRepository;
 import com.kerwin.gallery.repository.ThumbnailRepository;
@@ -33,15 +34,17 @@ public class CrawlerCommon {
     @Value("${app.check-duplicate}")
     private Boolean checkDuplicate;
 
+    private final MyDogService myDogService;
     private final ImageComponent imageComponent;
     private final CategoryRepository categoryRepository;
     private final ThumbnailRepository thumbnailRepository;
     private final WallpaperRepository wallpaperRepository;
     private final DimensionsRepository dimensionsRepository;
 
-    public CrawlerCommon(ImageComponent imageComponent, CategoryRepository categoryRepository,
+    public CrawlerCommon(MyDogService myDogService, ImageComponent imageComponent, CategoryRepository categoryRepository,
                          ThumbnailRepository thumbnailRepository, WallpaperRepository wallpaperRepository,
                          DimensionsRepository dimensionsRepository) {
+        this.myDogService = myDogService;
         this.imageComponent = imageComponent;
         this.categoryRepository = categoryRepository;
         this.thumbnailRepository = thumbnailRepository;
@@ -84,7 +87,9 @@ public class CrawlerCommon {
             put("relativeFilepathServer", "/api/static/" + relativeFilepath(thumbnailFile));
         }};
         thumbnailMap.putAll(this.imageComponent.imageDetail(thumbnailFile));
-        this.thumbnailRepository.insertThumbnail(thumbnailMap);
+//        this.thumbnailRepository.insertThumbnail(thumbnailMap);
+        // 图片缩略图使用自定义分表插入
+        thumbnailMap = this.myDogService.logicShard("thumbnail", thumbnailMap);
         return thumbnailMap;
     }
 

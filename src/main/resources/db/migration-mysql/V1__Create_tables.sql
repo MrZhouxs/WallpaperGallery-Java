@@ -21,6 +21,17 @@ CREATE TABLE if not exists `sys_upload_file`
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='文件上传记录表';
 
+CREATE TABLE if not exists `mydog_sequence_record`
+(
+    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+    `table_name` varchar(255) DEFAULT NULL COMMENT '分表的表名',
+    `from_date` datetime(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '分表第一条时间',
+    `to_date` datetime(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '分表最后一条时间',
+    `total` varchar(255) DEFAULT NULL COMMENT '分表的总数据量',
+    `create_time` datetime(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT '添加时间',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='自定义分表记录表';
+
 CREATE TABLE if not exists `wallpaper`
 (
     `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
