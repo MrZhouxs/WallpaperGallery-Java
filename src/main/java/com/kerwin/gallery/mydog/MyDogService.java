@@ -1,6 +1,5 @@
 package com.kerwin.gallery.mydog;
 
-import cn.hutool.core.util.StrUtil;
 import com.kerwin.common.PtCommon;
 import com.kerwin.common.PtDateTime;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +65,7 @@ public class MyDogService {
     }
 
     // 自定义逻辑分表功能
-    public List<Map<String, Object>> logicShard(String tableName, List<Map<String, Object>> data) {
+    synchronized public List<Map<String, Object>> logicShard(String tableName, List<Map<String, Object>> data) {
         // 插入数据之前检测是否需要分表
         if (this.mydogEnable) {
             // 统计当前表的总数据量
