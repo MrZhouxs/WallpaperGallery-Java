@@ -30,6 +30,8 @@ public class WallpaperServiceImpl implements WallpaperService {
 
     @Value("${app.word-segments-enable: false}")
     private Boolean wordSegmentsEnable;
+    @Value("${mydog.enable: true}")
+    private Boolean mydogEnable;
 
     private final ThumbnailRepository thumbnailRepository;
     private final WallpaperRepository wallpaperRepository;
@@ -90,7 +92,7 @@ public class WallpaperServiceImpl implements WallpaperService {
      * @param pageable      分页参数
      * @return              返回符合条件的所有分表数据
      */
-    private Page<Map<String, Object>> searchAllThumbnailTables(List<String> words, Pageable pageable) {
+    private Page<Map<String, Object>> searchAllThumbnailTables(List<String> words, Pageable pageable, String sortString) {
         List<String> tableNames = this.selectAllShardTableName();
         List<Future<Map<String, Object>>> futureList = new ArrayList<>();
         tableNames.forEach(tableName -> {
@@ -105,8 +107,6 @@ public class WallpaperServiceImpl implements WallpaperService {
                 e.printStackTrace();
             }
         });
-        // 拼接排序字段
-        String sortString = PtCommon.getSortString(pageable);
         // 符合条件的同数据量
         Long total = 0L;
         // 在分页条件下各个分表符合的临时记录
@@ -170,25 +170,30 @@ public class WallpaperServiceImpl implements WallpaperService {
     @Override
     public Page<Map<String, Object>> searchThumbnailListByIntelligentSemantics(Map<String, Object> params, Pageable pageable) {
         List<Map<String, Object>> data = new ArrayList<>();
+        long total = 0L;
         String keyWords = PtCommon.toString(params.get("key"));
         if (StrUtil.isNotBlank(keyWords)) {
             // 智能语义分词
             List<String> words = WordStatementParserUtil.parser(keyWords);
             if (PtCommon.isNotEmpty(words)) {
-                // 线程查找各个分表的缩略图数据
-                return this.searchAllThumbnailTables(words, pageable);
-
-//                 以下是单表查询
-//                // 查找缩略图
-//                data = this.thumbnailRepository.searchThumbnailListByIntelligentSemantics(words, pageable.getOffset(), pageable.getPageSize(), sortString);
-//                // 通过缩略图ID查找标签
-//                data = this.searchThumbnailById(data);
-//                // 统计数量
-//                count = this.thumbnailRepository.countThumbnailListByIntelligentSemantics(words);
+                // 拼接排序字段
+                String sortString = PtCommon.getSortString(pageable);
+                if (this.mydogEnable) {
+                    // 线程查找各个分表的缩略图数据
+                    return this.searchAllThumbnailTables(words, pageable, sortString);
+                } else {
+                    // 以下是单表查询: 查找缩略图
+                    data = this.thumbnailRepository.searchThumbnailListByIntelligentSemantics(words, pageable.getOffset(), pageable.getPageSize(), sortString);
+                    // 通过缩略图ID查找标签
+                    data = this.searchThumbnailById(data);
+                    // 统计数量
+                    Map<String, Long> count = this.thumbnailRepository.countThumbnailListByIntelligentSemantics(words);
+                    total = count == null ? 0L : count.get("number");
+                }
             }
         }
 
-        return new PageImpl<>(data, pageable, 0L);
+        return new PageImpl<>(data, pageable, total);
     }
 
     /**
