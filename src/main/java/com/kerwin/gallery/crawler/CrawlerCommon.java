@@ -34,6 +34,8 @@ public class CrawlerCommon {
     @Value("${app.check-duplicate}")
     private Boolean checkDuplicate;
 
+    private final Boolean isThumbnailRelated = true;
+
     private final MyDogService myDogService;
     private final ImageComponent imageComponent;
     private final CategoryRepository categoryRepository;
@@ -89,7 +91,7 @@ public class CrawlerCommon {
         thumbnailMap.putAll(this.imageComponent.imageDetail(thumbnailFile));
 //        this.thumbnailRepository.insertThumbnail(thumbnailMap);
         // 图片缩略图使用自定义分表插入
-        thumbnailMap = this.myDogService.logicShard("thumbnail", thumbnailMap);
+        thumbnailMap = this.myDogService.logicShard("thumbnail", thumbnailMap, this.isThumbnailRelated);
         return thumbnailMap;
     }
 

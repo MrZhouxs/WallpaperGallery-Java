@@ -57,15 +57,30 @@ public class MyDogService {
         return affectRows > 0L;
     }
 
-    // 自定义逻辑分表功能
-    public Map<String, Object> logicShard(String tableName, Map<String, Object> data) {
-        List<Map<String, Object>> temp = new ArrayList<>();
-        temp.add(data);
-        return this.logicShard(tableName, temp).get(0);
+    // 获取表的Auto_Increment
+    private Long selectTableAutoIncrement(String tableName) {
+        Long autoIncrement = 0L;
+        List<Map<String, Object>> tmp = this.myDogMapper.selectTableAutoIncrement(tableName);
+        if (PtCommon.isNotEmpty(tmp)) {
+            autoIncrement = PtCommon.toLong(tmp.get(0).get("Auto_increment"));
+        }
+        return autoIncrement;
+    }
+
+    // 修改表的Auto_Increment
+    private void alterTableAutoIncrement(String tableName, Long autoIncrement) {
+        this.myDogMapper.alterTableAutoIncrement(tableName, autoIncrement);
     }
 
     // 自定义逻辑分表功能
-    synchronized public List<Map<String, Object>> logicShard(String tableName, List<Map<String, Object>> data) {
+    synchronized public Map<String, Object> logicShard(String tableName, Map<String, Object> data, Boolean isTableRelated) {
+        List<Map<String, Object>> temp = new ArrayList<>();
+        temp.add(data);
+        return this.logicShard(tableName, temp, isTableRelated).get(0);
+    }
+
+    // 自定义逻辑分表功能
+    synchronized public List<Map<String, Object>> logicShard(String tableName, List<Map<String, Object>> data, Boolean isTableRelated) {
         // 插入数据之前检测是否需要分表
         if (this.mydogEnable) {
             // 统计当前表的总数据量
@@ -77,12 +92,18 @@ public class MyDogService {
                 String shardTableName = tableName + currentDate;
                 // 将当前表的数据量记入到分表记录表中
                 this.recordTable(tableName, currentTableCount,"create_time");
-                // 修改表名
-                this.alterTableName(tableName, shardTableName);
                 // 获取表的DDL
                 String ddl = this.selectTableDDL(tableName);
+                // 获取旧表的Auto_Increment
+                Long autoIncrement = this.selectTableAutoIncrement(tableName);
+                // 修改表名
+                this.alterTableName(tableName, shardTableName);
                 // 根据DDL重新创建表
                 this.myDogMapper.createTableByDDL(ddl);
+                if (isTableRelated) {
+                    // 修改表的自增ID(对于没有关联关系的表，不需要修改自增ID的起始值；如果是有关联关系的表，分表后的数据不设置起始值会有重复ID的问题)
+                    this.alterTableAutoIncrement(shardTableName, autoIncrement + 1);
+                }
             }
         }
         // 插入数据

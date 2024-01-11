@@ -6,6 +6,14 @@
         #{ddl}
     </select>
 
+    <select id="selectTableAutoIncrement" parameterType="string" resultType="java.util.Map">
+        SHOW TABLE STATUS LIKE #{tableName, jdbcType=VARCHAR}
+    </select>
+
+    <update id="alterTableAutoIncrement">
+        ALTER TABLE ${tableName} auto_increment = #{increment,jdbcType=BIGINT}
+    </update>
+
     <insert id="insertTable" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="list.id">
         insert into ${tableName}
         <foreach collection="fields" item="field" separator="," open="(" close=")">

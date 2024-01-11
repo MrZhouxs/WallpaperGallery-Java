@@ -12,6 +12,12 @@ public interface MyDogMapper {
     // 通过DDL创建表
     Map<String, Object> createTableByDDL(@Param("ddl") String ddl);
 
+    // 获取表的自增ID
+    List<Map<String, Object>> selectTableAutoIncrement(@Param("tableName") String tableName);
+
+    // 修改表的自增ID
+    void alterTableAutoIncrement(@Param("tableName") String tableName, @Param("increment") Long increment);
+
     // 拼接SQL并插入表中
     void insertTable(@Param("tableName") String tableName,
                      @Param("fields") List<String> fields,
