@@ -41,6 +41,7 @@ public interface ThumbnailRepository {
                                                                         @Param("offset") Long offset,
                                                                         @Param("limit") Integer limit,
                                                                         @Param("sortString") String sortString);
+
     // 统计缩略图数量
     Map<String, Long> countThumbnailListByIntelligentSemantics(@Param("words") List<String> words);
 
@@ -55,4 +56,15 @@ public interface ThumbnailRepository {
 
     // 缩略图预览加一
     void addThumbnailPreview(@Param("thumbnailId") Long thumbnailId);
+
+    // 获取所有图片缩略图的分表记录
+    List<Map<String, Object>> selectSequenceRecord();
+
+    // 统计所有图片缩略图分表的详情信息
+    Map<String, Long> countThumbnailShardDetail(@Param("tableName") String tableName,
+                                                @Param("words") List<String> words);
+
+    // 多关键词获取缩略图列表
+    List<Map<String, Object>> searchThumbnailShard(@Param("words") List<String> words,
+                                                   @Param("map") Map<String, Object> map);
 }

@@ -159,4 +159,23 @@
     <update id="addThumbnailPreview">
         update `thumbnail` set preview_count = preview_count +  1 where id=#{thumbnailId, jdbcType=BIGINT}
     </update>
+
+    <select id="selectSequenceRecord" resultType="java.util.Map">
+        select * from `mydog_sequence_record` order by to_date desc
+    </select>
+
+    <select id="countThumbnailShardDetail" resultType="java.util.Map">
+        select count(*) as number from ${tableName}
+        <include refid="selectThumbnailCondByWords"></include>
+    </select>
+
+    <!-- 多关键词获取缩略图 -->
+    <select id="searchThumbnailShard" resultType="java.util.Map">
+        select <include refid="selectThumbnailField"></include> from ${map.tableName}
+        <include refid="selectThumbnailCondByWords"></include>
+        <if test="map.sortString != null and map.sortString neq ''" >
+            ORDER BY #{map.sortString}
+        </if>
+        limit #{map.limit} offset #{map.offset};
+    </select>
 </mapper>
